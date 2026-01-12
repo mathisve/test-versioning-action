@@ -1,0 +1,30 @@
+name: Bump and Tag
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  bump:
+    runs-on: ubuntu-latest
+    steps:
+      # 1) Checkout full history (needed for version calculation)
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      # 2) Get semver version
+      - name: Get version
+        id: semver
+        uses: codacy/git-version@2
+
+      # 3) Create and push tag with that version
+      - name: Create Git Tag
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git tag "v${{ steps.semver.outputs.version }}"
+          git push origin "v${{ steps.semver.outputs.version }}"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
